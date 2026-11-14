@@ -15,11 +15,7 @@ A non-intrusive UGUI compositing and branch-baking system for Unity (URP). Flatt
 
 ## Installation
 
-### Via Unity Asset Store
-
-*(Link coming soon pending approval)*
-
-1. Purchase and download **FlattenUI** from the **Unity Asset Store**.
+1. Download **FlattenUI** from the **Unity Asset Store**.
 2. Open `Window > Package Manager`, switch to **My Assets**, and click **Import**.
 
 ## Quick Start
