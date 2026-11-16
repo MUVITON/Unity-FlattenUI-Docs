@@ -89,21 +89,27 @@ When using Unity's new Hierarchy window, **FlattenUI** draws branch connector li
 ```csharp
 using FlattenUI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class StickerCardView : MonoBehaviour
+[RequireComponent(typeof(FlattenGraphic))]
+public class StickerCardView : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private FlattenGraphic _flattenGraphic;
-    [SerializeField] private Image          _innerIcon;
+    /*
+     * Hierarchy:
+     * StickerCard (GameObject) [RawImage, FlattenGraphic, RawImageUVController, StickerCardView]
+     * └── InnerIcon (GameObject with UI Image) <-- _innerIcon
+     */
 
-    public void UpdateIcon(Color newColor, Vector2 newPosition)
+    [SerializeField] private Image _innerIcon;
+
+    public void OnPointerClick(PointerEventData eventData)
     {
-        // Modify child UI elements inside the baked branch
-        _innerIcon.color = newColor;
-        _innerIcon.rectTransform.anchoredPosition = newPosition;
+        // Change a graphic inside the baked branch.
+        _innerIcon.color = Random.ColorHSV();
 
-        // Schedule a single-frame re-bake (DirtyType.Marker)
-        _flattenGraphic.MarkDirty();
+        // Update the cached texture to reflect the change.
+        GetComponent<FlattenGraphic>().MarkDirty();
     }
 }
 ```
@@ -125,8 +131,6 @@ public class StickerCardView : MonoBehaviour
 | `FlattenCompositor Compositor { get; }` | Returns the `FlattenCompositor` managing this branch, or `null` if unbound. |
 | `DirtyType DirtyType { get; }` | Current invalidation mode (`None`, `Marker`, or `Always`). |
 | `bool IsDirty { get; }` | `true` when `DirtyType != DirtyType.None`. |
-| `bool ShouldBeVisible { get; }` | `true` when both `IsActive` and `isActiveAndEnabled` are `true`. |
-| `bool ShouldRender { get; }` | `true` when `ShouldBeVisible && IsDirty`. |
 | `event Action<DirtyType> DirtyTypeChanged` | Invoked whenever `DirtyType` changes. |
 | `void SetDirtyType(DirtyType type)` | Sets the dirty state and updates the rendering subscription in the compositor. |
 | `void MarkDirty()` | Sets `DirtyType.Marker` to bake once next frame (unless already set to `Always`). |
@@ -144,7 +148,6 @@ public class StickerCardView : MonoBehaviour
 | :--- | :--- |
 | `void Rebuild()` | Schedules a deferred full tree rebuild for the compositor. |
 | `void Rebuild(Transform transform)` | Queues a deferred subtree rebuild for the specified `Transform` in the compositor tree. |
-| `void Rebuild(FlattenGraphic graphic)` | Queues a deferred subtree rebuild for the specified `FlattenGraphic`. |
 | `void RebuildImmediate()` | Immediately rebuilds the entire node tree managed by the compositor. |
 | `void RebuildImmediate(Transform transform)` | Immediately rebuilds the subtree of the specified `Transform` in the compositor tree. |
 
