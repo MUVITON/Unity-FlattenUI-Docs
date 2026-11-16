@@ -15,7 +15,7 @@ A non-intrusive UGUI compositing and branch-baking system for Unity (URP). Flatt
 
 ## Installation
 
-1. Download **FlattenUI** from the **Unity Asset Store**.
+1. Download and purchase **FlattenUI** from the [Unity Asset Store](https://assetstore.unity.com/packages/slug/430314) (or via short link [u3d.as/4jzo](https://u3d.as/4jzo)).
 2. Open `Window > Package Manager`, switch to **My Assets**, and click **Import**.
 
 ## Quick Start
@@ -31,14 +31,14 @@ A non-intrusive UGUI compositing and branch-baking system for Unity (URP). Flatt
 
 <img src="./Images/inspector_compositor.png" alt="FlattenCompositor Inspector" width="500" />
 
-Attach this component to your **Root Canvas**. It manages the internal node hierarchy, processes queued rebuilds, and executes the URP offscreen baking pass in `LateUpdate`.
+Attach this component to your **Root Canvas**. It manages the internal node hierarchy, processes queued rebuilds, and executes the URP offscreen baking pass during `Canvas.preWillRenderCanvases`. It automatically resolves the rendering camera from the Canvas world camera or falls back to `Camera.main`.
 
-- **Camera:** The camera used to execute URP render requests. If left empty, the compositor automatically falls back to the camera attached to the `Canvas` (`Canvas.worldCamera`) or `Camera.main`.
 - **Activity:**
   - **Is Active:** Globally enables or disables flattening for all managed branches under this Canvas.
   - **Activated / Deactivated:** UnityEvents invoked when the compositor is enabled or disabled.
-- **Additional:**
-  - **Serialize Tree:** *(Editor Only)* Preserves the internal node tree across script recompilations and domain reloads.
+- **Additional (Editor Only):**
+  - **Serialize Tree:** Preserves the internal node tree across script recompilations and domain reloads.
+  - **Rebuild On Hierarchy Changed:** Automatically schedules a node tree rebuild in Edit Mode whenever the scene hierarchy changes.
 
 ### 2. FlattenGraphic (UI Branch Baker)
 
@@ -142,9 +142,17 @@ public class StickerCardView : MonoBehaviour
 
 | Member | Description |
 | :--- | :--- |
+| `void Rebuild()` | Schedules a deferred full tree rebuild for the compositor. |
 | `void Rebuild(Transform transform)` | Queues a deferred subtree rebuild for the specified `Transform` in the compositor tree. |
 | `void Rebuild(FlattenGraphic graphic)` | Queues a deferred subtree rebuild for the specified `FlattenGraphic`. |
+| `void RebuildImmediate()` | Immediately rebuilds the entire node tree managed by the compositor. |
 | `void RebuildImmediate(Transform transform)` | Immediately rebuilds the subtree of the specified `Transform` in the compositor tree. |
+
+### `FlattenRenderer`
+
+| Member | Description |
+| :--- | :--- |
+| `static bool IsRendering { get; }` | Returns `true` while an offscreen flatten render pass is actively in progress. Useful for ignoring state changes or layout callbacks triggered during baking. |
 
 ### `RawImageUVController`
 
